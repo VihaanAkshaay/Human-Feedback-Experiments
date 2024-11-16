@@ -2,13 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
+import matplotlib.pyplot as plt
 
 class RewardModel(nn.Module):
     def __init__(self):
         super(RewardModel, self).__init__()
-        self.fc1 = nn.Linear(1, 24)
-        self.fc2 = nn.Linear(24, 12)
-        self.fc3 = nn.Linear(12, 1)
+        self.fc1 = nn.Linear(1, 124)
+        self.fc2 = nn.Linear(124, 248)
+        self.fc3 = nn.Linear(248, 1)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -33,8 +34,8 @@ def query_preference(a, b):
 # 1. Initialize the reward model
 model = RewardModel()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-num_items = 10
-num_queries = 20
+num_items = 20
+num_queries = 40
 
 # Generate random pairs of numbers
 pairs = [(random.randint(1, num_items), random.randint(1, num_items)) for _ in range(num_queries)]
@@ -69,8 +70,17 @@ for epoch in range(epochs):
     print(f"Epoch {epoch + 1}, Loss: {total_loss}")
 
 # 4. Output reward for each number
-print("Reward for each item:")
+print("Reward for each number:")
+rewards = []
 for i in range(1, num_items + 1):
     reward = model(torch.tensor([i], dtype=torch.float32)).item()
-    print(f"Item: {i}, Reward: {reward}")
+    print(f"Number {i}, Reward: {reward}")
+    rewards.append(reward)
 
+# 5. Visualize the rewards
+plt.figure(figsize=(10, 5))
+plt.bar(range(1, num_items + 1), rewards)
+plt.xlabel("Number")
+plt.ylabel("Reward")
+plt.title("Reward Model for Numbers")
+plt.show()
